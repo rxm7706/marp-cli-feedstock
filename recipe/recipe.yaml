@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
+schema_version: 1
+
+context:
+  version: "4.5.0"
+
+package:
+  name: marp-cli
+  version: ${{ version }}
+
+source:
+  url: https://registry.npmjs.org/@marp-team/marp-cli/-/marp-cli-${{ version }}.tgz
+  sha256: 36145f3400213afec408f8eff5dec2a3e5c5238201246d598019c5a5e4606d88
+
+build:
+  number: 0
+  script:
+    - if: unix
+      then:
+        - set -ex
+        - pnpm install --ignore-scripts
+        - npm pack --ignore-scripts
+        - npm install --global "${SRC_DIR}/marp-team-marp-cli-${{ version }}.tgz"
+        - pnpm-licenses generate-disclaimer --prod --output-file=third-party-licenses.txt
+      else:
+        - call pnpm install --ignore-scripts
+        - if %ERRORLEVEL% neq 0 exit 1
+        - call npm pack --ignore-scripts
+        - if %ERRORLEVEL% neq 0 exit 1
+        - call npm install --global %SRC_DIR%/marp-team-marp-cli-${{ version }}.tgz
+        - if %ERRORLEVEL% neq 0 exit 1
+        - call pnpm-licenses generate-disclaimer --prod --output-file=third-party-licenses.txt
+        - if %ERRORLEVEL% neq 0 exit 1
+
+requirements:
+  build:
+    - nodejs
+    - pnpm
+    - pnpm-licenses
+  host:
+    - nodejs
+  run:
+    - nodejs
+
+tests:
+  - script:
+      - marp --help
+
+about:
+  license: MIT
+  license_file:
+    - LICENSE
+    - third-party-licenses.txt
+  summary: A CLI interface for Marp and Marpit based converters
+  description: |
+    **A CLI interface, for [Marp](https://github.com/marp-team/marp)** (using [@marp-team/marp-core](https://github.com/marp-team/marp-core)) and any slide deck converter based on [Marpit](https://marpit.marp.app/) framework.
+  homepage: https://github.com/marp-team/marp-cli
+  repository: https://github.com/marp-team/marp-cli
+
+extra:
+  recipe-maintainers:
+    - kklein
